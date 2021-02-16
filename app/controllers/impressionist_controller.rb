@@ -1,15 +1,24 @@
 require 'digest/sha2'
 
+
 module ImpressionistController
   module ClassMethods
     def impressionist(opts={})
-      before_action { |c| c.impressionist_subapp_filter(opts) }
+      if Rails::VERSION::MAJOR >= 5
+        before_action { |c| c.impressionist_subapp_filter(opts) }
+      else
+        before_filter { |c| c.impressionist_subapp_filter(opts) }
+      end
     end
   end
 
   module InstanceMethods
     def self.included(base)
-      base.before_action :impressionist_app_filter
+      if Rails::VERSION::MAJOR >= 5
+        base.before_action :impressionist_app_filter
+      else
+        base.before_filter :impressionist_app_filter
+      end
     end
 
     def impressionist(obj,message=nil,opts={})
@@ -43,6 +52,14 @@ module ImpressionistController
 
     # creates a statment hash that contains default values for creating an impression via an AR relation.
     def associative_create_statement(query_params={})
+        # support older versions of rails:
+        # see https://github.com/rails/rails/pull/34039
+      if Rails::VERSION::MAJOR < 6
+        filter = ActionDispatch::Http::ParameterFilter.new(Rails.application.config.filter_parameters)
+      else
+        filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
+      end
+
       query_params.reverse_merge!(
         :controller_name => controller_name,
         :action_name => action_name,
@@ -51,7 +68,7 @@ module ImpressionistController
         :session_hash => session_hash,
         :ip_address => request.remote_ip,
         :referrer => request.referer,
-        :params => params_hash
+        :params => filter.filter(params_hash)
         )
     end
 
@@ -103,7 +120,7 @@ module ImpressionistController
       request_param = params_hash
       impressions.detect{|impression| impression.params == request_param }.nil?
     end
-    
+
     # creates the query to check for uniqueness
     def unique_query(unique_opts,impressionable=nil)
       full_statement = direct_create_statement({},impressionable)
@@ -128,12 +145,26 @@ module ImpressionistController
     end
 
     def session_hash
+
       # # careful: request.session_options[:id] encoding in rspec test was ASCII-8BIT
       # # that broke the database query for uniqueness. not sure if this is a testing only issue.
       # str = request.session_options[:id]
       # logger.debug "Encoding: #{str.encoding.inspect}"
       # # request.session_options[:id].encode("ISO-8859-1")
-      request.session_options[:id]
+      if Rails::VERSION::MAJOR >= 4
+        session["init"] = true
+        id = session.id.to_s
+      else
+        id = request.session_options[:id]
+      end
+
+      unless id.is_a? String
+        id = id.cookie_value if Rack::Session::SessionId.const_defined?(:ID_VERSION) && Rack::Session::SessionId::ID_VERSION == 2
+      end
+
+      # id = cookies.session.id
+      # rack 2.0.8 releases new version of session id, id.to_s will raise error!
+      id
     end
 
     def params_hash

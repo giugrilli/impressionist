@@ -3,6 +3,9 @@
 [![Build Status](https://secure.travis-ci.org/charlotte-ruby/impressionist.png?branch=master)](http://travis-ci.org/charlotte-ruby/impressionist)
 [![Code Climate](https://codeclimate.com/github/charlotte-ruby/impressionist.png)](https://codeclimate.com/github/charlotte-ruby/impressionist)
 
+WE ARE LOOKING FOR MAINTAINERS.  CONTACT @johnmcaliley IF YOU ARE INTERESTED IN HELPING
+=======================================================================================
+
 impressionist
 =============
 
@@ -30,7 +33,11 @@ Installation
 ------------
 Add it to your Gemfile
 
+    #rails 6
     gem 'impressionist'
+    
+    #rails 5 or lower
+    gem 'impressionist', '~>1.6.1'
 
 Install with Bundler
 
@@ -91,9 +98,10 @@ Usage
    controller if you are using this method.  If you add "impressionist" to the
    top of your controller and also use this method in your action, it will
    result in 2 impressions being logged (but associated with one request_hash).
-   If you're using [friendly_id](https://github.com/norman/friendly_id) be sure 
-   to log impressionist this way, as params[:id] will return a string(url slug) 
-   while impressionable_id is a Integer column in database.
+   If you're using [friendly_id](https://github.com/norman/friendly_id) be sure
+   to log impressionist this way, as params[:id] will return a string(url slug)
+   while impressionable_id is a Integer column in database. Also note that you
+   have to take step #3 for the Widget model for this to work.
 
         def show
           @widget = Widget.find
@@ -119,7 +127,7 @@ Usage
    in turn will give you impressions with unique params.
 
         @widget.impressionist_count(:filter => :params)
-        
+
 8. Get the unique impression count from a model filtered by session hash.  Same
    as #6 regarding request hash.  This may be more desirable than filtering by
    IP address depending on your situation, since filtering by IP may ignore
@@ -138,7 +146,7 @@ Usage
         @widget.impressionist_count(:message=>"pageview", :filter=>:all)
 
 Logging impressions for authenticated users happens automatically.  If you have
-a current_user helper or use @current_user in your before_action to set your
+a current_user helper or use @current_user in your before_filter (or before_action in Rails >= 5.0) to set your
 authenticated user, current_user.id will be written to the user_id field in the
 impressions table.
 
@@ -174,6 +182,10 @@ It is as simple as this:
 
     t.integer :my_column_name, :default => 0
 
+If you want to use the typical Rails 4 migration generator, you can:
+
+    rails g migration AddImpressionsCountToBook impressions_count:int
+
 What if I only want to record unique impressions?
 -------------------------------------------------
 Maybe you only care about unique impressions and would like to avoid
@@ -188,7 +200,7 @@ impressions in your controller:
 
     # only record impression if session is unique
     impressionist :unique => [:session_hash]
-    
+
     # only record impression if param is unique
     impressionist :unique => [:params]
 
@@ -241,8 +253,11 @@ Want to run the tests? Ok mummy
 
 Contributors
 ------------
+WE ARE CURRENTLY LOOKING FOR SOMEONE TO HELP MAINTAIN THIS REPOSITORY.  IF YOU ARE INTERESTED, MESSAGE @johnmcaliley.
+
 * [johnmcaliley - creator](https://github.com/johnmcaliley)
-* [Antonio C Nalesso - maintainer](https://github.com/acnalesso)
+* [jgrau](https://github.com/jgrau)
+* [acnalesso](https://github.com/acnalesso)
 * [coryschires](https://github.com/coryschires)
 * [georgmittendorfer](https://github.com/georgmittendorfer)
 

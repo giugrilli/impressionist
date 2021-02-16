@@ -1,3 +1,21 @@
+== 1.6.1 (2018-04-16)
+* Add belongs_to optional true to setup_association (#264, @josephMG)
+* Add missing field for Mongoid (#254, @Fibrasek)
+* Implemented patch that will add the Rails major version to the migration file (#248, @jordanhudgens)
+* Add params filtering on new column (#246, @rposborne)
+* Add a DB migration to add params to schema. (#245, @rposborne)
+
+== 1.6.0 (2017-05-24)
+* Documentation example for counter_cache (#239, @fwolfst)
+* Green Travis CI builds (#238, @jgrau)
+* Rails 5.1 support (#241, @msimonborg)
+* Use `dependent: :delete_all` instead of `:destroy` for performance gains (#242, @midnightSuyama & @jgrau)
+* Fix counter cache not updating when no `unique` option is set (#243, @sachiotomita & @jgrau)
+
+== 1.5.2 (2016-09-16)
+
+== 1.5.1 (2013-12-31)
+
 == 1.5.0 (2013-12-30)
 * Added message filtering.
 * (@overovermind)
